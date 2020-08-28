@@ -40,11 +40,32 @@ class UserResponse {
 
 @Resolver()
 export class UserResolver {
-  @Mutation(() => User)
+  @Mutation(() => UserResponse)
   async register(
     @Arg("option") options: UsernamePasswordInput,
     @Ctx() { em }: MyContext
-  ) {
+  ): Promise<UserResponse> {
+    if (options.username.length <= 2) {
+      return {
+        errors: [
+          {
+            field: "username",
+            message: "username can't be less than 2 word",
+          },
+        ],
+      };
+    }
+    if (options.password.length <= 6) {
+      return {
+        errors: [
+          {
+            field: "password",
+            message: "password can't be less than 6 word",
+          },
+        ],
+      };
+    }
+
     const hashedPassword = await argon2.hash(options.password);
 
     const user = em.create(User, {
@@ -52,7 +73,7 @@ export class UserResolver {
       password: hashedPassword,
     });
     await em.persistAndFlush(user);
-    return user;
+    return { user };
   }
 
   @Mutation(() => UserResponse)
