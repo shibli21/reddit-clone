@@ -35,6 +35,7 @@ const main = async () => {
         sameSite: "lax", //csrf
         secure: __prod__, //cookie only work is https
       },
+      saveUninitialized: false,
       secret: "keyboard cat", // ! have to make this environment variable
       resave: false,
     })
