@@ -1,3 +1,4 @@
+import { validateRegister } from "./../utils/validateRegister";
 import { COOKIE_NAME } from "./../constants";
 import { EntityManager } from "@mikro-orm/postgresql";
 import { User } from "./../entities/User";
@@ -6,7 +7,6 @@ import {
   Resolver,
   Mutation,
   Field,
-  InputType,
   Arg,
   Ctx,
   ObjectType,
@@ -14,15 +14,8 @@ import {
 } from "type-graphql";
 import "reflect-metadata";
 import argon2 from "argon2";
+import { UsernamePasswordInput } from "../utils/UsernamePasswordInput";
 
-@InputType()
-class UsernamePasswordInput {
-  @Field()
-  username: string;
-
-  @Field()
-  password: string;
-}
 @ObjectType()
 class FieldError {
   @Field()
@@ -43,6 +36,12 @@ class UserResponse {
 
 @Resolver()
 export class UserResolver {
+  @Mutation(() => Boolean)
+  async forgotPassword(@Arg("email") email: string, @Ctx() { em }: MyContext) {
+    // const user = await em.findOne(User, { email });
+    return true;
+  }
+
   @Query(() => User, { nullable: true })
   async me(@Ctx() { req, em }: MyContext) {
     //! You are not logged in
@@ -58,25 +57,9 @@ export class UserResolver {
     @Arg("option") options: UsernamePasswordInput,
     @Ctx() { em, req }: MyContext
   ): Promise<UserResponse> {
-    if (options.username.length <= 2) {
-      return {
-        errors: [
-          {
-            field: "username",
-            message: "username can't be less than 2 word",
-          },
-        ],
-      };
-    }
-    if (options.password.length <= 6) {
-      return {
-        errors: [
-          {
-            field: "password",
-            message: "password can't be less than 6 word",
-          },
-        ],
-      };
+    const errors = validateRegister(options);
+    if (errors) {
+      return { errors };
     }
 
     const hashedPassword = await argon2.hash(options.password);
@@ -94,6 +77,7 @@ export class UserResolver {
         .insert({
           username: options.username,
           password: hashedPassword,
+          email: options.email,
           created_at: new Date(),
           updated_at: new Date(),
         })
@@ -123,10 +107,16 @@ export class UserResolver {
 
   @Mutation(() => UserResponse)
   async login(
-    @Arg("option") options: UsernamePasswordInput,
+    @Arg("usernameOrEmail") usernameOrEmail: string,
+    @Arg("password") password: string,
     @Ctx() { em, req }: MyContext
   ): Promise<UserResponse> {
-    const user = await em.findOne(User, { username: options.username });
+    const user = await em.findOne(
+      User,
+      usernameOrEmail.includes("@")
+        ? { email: usernameOrEmail }
+        : { username: usernameOrEmail }
+    );
 
     if (!user) {
       return {
@@ -139,7 +129,7 @@ export class UserResolver {
       };
     }
 
-    const valid = await argon2.verify(user.password, options.password);
+    const valid = await argon2.verify(user.password, password);
 
     if (!valid) {
       return {
