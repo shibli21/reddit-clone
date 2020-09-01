@@ -1,15 +1,7 @@
 import { UsernamePasswordInput } from "./UsernamePasswordInput";
 
 export const validateRegister = (options: UsernamePasswordInput) => {
-  if (!options.email.includes("@")) {
-    return [
-      {
-        field: "email",
-        message: "Invalid email",
-      },
-    ];
-  }
-  if (!options.username.includes("@")) {
+  if (options.username.includes("@")) {
     return [
       {
         field: "username",
@@ -22,6 +14,14 @@ export const validateRegister = (options: UsernamePasswordInput) => {
       {
         field: "username",
         message: "username can't be less than 2 word",
+      },
+    ];
+  }
+  if (!options.email.includes("@")) {
+    return [
+      {
+        field: "email",
+        message: "Invalid email",
       },
     ];
   }

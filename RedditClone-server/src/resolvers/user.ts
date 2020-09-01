@@ -122,7 +122,7 @@ export class UserResolver {
       return {
         errors: [
           {
-            field: "username",
+            field: "usernameOrEmail",
             message: "That user doesn't exits",
           },
         ],
