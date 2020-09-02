@@ -1,4 +1,3 @@
-import { MikroORM } from "@mikro-orm/core";
 import { ApolloServer } from "apollo-server-express";
 import connectRedis from "connect-redis";
 import cors from "cors";
@@ -8,17 +7,49 @@ import Redis from "ioredis";
 import "reflect-metadata";
 import { MyContext } from "src/types";
 import { buildSchema } from "type-graphql";
+import { createConnection, getConnection, getConnectionManager } from "typeorm";
 import { COOKIE_NAME, __prod__ } from "./constants";
-import mikroOrmConfig from "./mikro-orm.config";
+import { Post } from "./entities/Post";
+import { User } from "./entities/User";
 import { HelloResolver } from "./resolvers/hello";
 import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
 
 const main = async () => {
-  const orm = await MikroORM.init(mikroOrmConfig);
+  // const conn = await createConnection({
+  //   type: "postgres",
+  //   database: "sredit",
+  //   host: "localhost",
+  //   port: 5432,
+  //   username: "shibli21",
+  //   password: "root",
+  //   logging: true,
+  //   synchronize: true,
+  //   entities: [User, Post],
+  // });
 
-  // await orm.em.nativeDelete(User, {});
-  await orm.getMigrator().up();
+  // * FOR MySQL
+  // const connectionManager = getConnectionManager();
+  // const connection = connectionManager.create({
+  //   type: "mysql",
+  //   host: "localhost",
+  //   port: 3306,
+  //   username: "root",
+  //   database: "sredit",
+  //   synchronize: true,
+  //   entities: [User, Post],
+  // });
+  // await connection.connect();
+
+  const connection = await createConnection({
+    type: "mysql",
+    host: "localhost",
+    port: 3306,
+    username: "root",
+    database: "sredit",
+    synchronize: true,
+    entities: [User, Post],
+  });
 
   const app = express();
 
@@ -49,7 +80,7 @@ const main = async () => {
       resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false,
     }),
-    context: ({ req, res }): MyContext => ({ em: orm.em, req, res, redis }),
+    context: ({ req, res }): MyContext => ({ req, res, redis }),
   });
 
   apolloServer.applyMiddleware({ app, cors: false });
