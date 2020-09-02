@@ -1,6 +1,7 @@
-import { Button, Alert, AlertIcon, Stack } from "@chakra-ui/core";
+import { Button, Alert, AlertIcon, Stack, Flex, Link } from "@chakra-ui/core";
 import { Form, Formik } from "formik";
 import { NextPage } from "next";
+import NextLink from "next/link";
 import React, { useState } from "react";
 import InputField from "../../components/InputField";
 import Wrapper from "../../components/Wrapper";
@@ -43,10 +44,15 @@ const ChangePassword: NextPage<{ token: string }> = ({ token }) => {
               type="password"
             />
             {tokenError ? (
-              <Alert status="error" mt={4}>
-                <AlertIcon />
-                There was an error processing your request
-              </Alert>
+              <Flex>
+                <Alert status="error" mt={4} mr={2}>
+                  <AlertIcon />
+                  There was an error processing your request
+                </Alert>
+                <NextLink href="/forgot-password">
+                  <Link>click here to get a new one</Link>
+                </NextLink>
+              </Flex>
             ) : null}
             <Button
               mt={4}
