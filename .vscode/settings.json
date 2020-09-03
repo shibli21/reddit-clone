@@ -1,6 +1,9 @@
 {
-    "cSpell.words": [
-        "postgres",
-        "sreddit"
-    ]
+  "cSpell.words": ["postgres", "sreddit"],
+  "workbench.colorCustomizations": {
+    // "titleBar.activeBackground": "#486357",
+    // "titleBar.activeForeground": "#c8e9c5",
+    "statusBar.background": "#486357",
+    "statusBar.foreground": "#c8e9c5"
+  }
 }
