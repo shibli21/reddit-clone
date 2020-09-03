@@ -51,7 +51,7 @@ export const NavBar = (props: Props) => {
     );
   }
   return (
-    <Flex bg="black" p={4}>
+    <Flex position="sticky" top={0} zIndex={1} bg="black" p={4}>
       <Box ml={"auto"} maxW="1100px">
         {body}
       </Box>
