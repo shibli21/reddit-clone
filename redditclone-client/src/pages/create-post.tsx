@@ -22,6 +22,7 @@ const CreatePost: React.FC<{}> = () => {
         initialValues={{ title: "", text: "" }}
         onSubmit={async (values) => {
           const { error } = await createPost({ input: values });
+          router.push("/");
         }}
       >
         {({ isSubmitting }) => (

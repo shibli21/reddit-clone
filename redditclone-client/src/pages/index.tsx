@@ -1,23 +1,37 @@
+import { Box, Flex, Heading, Link, Stack, Text } from "@chakra-ui/core";
 import { withUrqlClient } from "next-urql";
-import { NavBar } from "../components/NavBar";
+import NextLink from "next/link";
+import Layout from "../components/Layout";
 import { usePostsQuery } from "../generated/graphql";
 import { createUrqlClient } from "../utils/createUrqlClient";
-import Layout from "../components/Layout";
-import { Link } from "@chakra-ui/core";
-import NextLink from "next/link";
 
 const Index = () => {
-  const [{ data }] = usePostsQuery();
+  const [{ data }] = usePostsQuery({
+    variables: {
+      limit: 50,
+    },
+  });
   return (
     <Layout>
-      <Link>
-        <NextLink href="/create-post">create post</NextLink>
-      </Link>
+      <Flex alignItems="center">
+        <Heading color="teal">S redit</Heading>
+        <NextLink href="/create-post">
+          <Link ml="auto">create post</Link>
+        </NextLink>
+      </Flex>
+
       <br />
       {!data ? (
         <h1>Loading ..</h1>
       ) : (
-        data.posts.map((post) => <h1 key={post.id}> {post.title}</h1>)
+        <Stack spacing={8}>
+          {data.posts.map((post) => (
+            <Box key={post.id} p={5} shadow="md" borderWidth="1px">
+              <Heading fontSize="xl">{post.title}</Heading>
+              <Text mt={4}>{post.text}</Text>
+            </Box>
+          ))}
+        </Stack>
       )}
     </Layout>
   );

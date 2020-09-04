@@ -9,6 +9,8 @@ const theme = {
   colors: {
     ...chakraTheme.colors,
     black: "#16161D",
+    teal: "teal",
+    Gray: "#1A202C",
   },
   fonts,
   breakpoints,
