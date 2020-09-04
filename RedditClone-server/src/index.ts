@@ -48,6 +48,7 @@ const main = async () => {
     username: "root",
     database: "sredit",
     synchronize: true,
+    logging: true,
     entities: [User, Post],
   });
 
