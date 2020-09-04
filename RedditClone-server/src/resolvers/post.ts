@@ -26,12 +26,7 @@ class PostInput {
 @Resolver()
 export class PostResolver {
   @Query(() => [Post])
-  async posts() {
-    return Post.find();
-  }
-
-  @Query(() => [Post])
-  async post(
+  async posts(
     @Arg("limit", () => Int) limit: number,
     @Arg("cursor", () => String, { nullable: true }) cursor: string | null
   ): Promise<Post[]> {
@@ -39,12 +34,17 @@ export class PostResolver {
     const qb = getConnection()
       .getRepository(Post)
       .createQueryBuilder("p")
-      .orderBy("createdAt", "ASC")
+      .orderBy("createdAt", "DESC")
       .take(realLimit);
     if (cursor) {
       qb.where(`p.createdAt < :cursor`, { cursor: new Date(parseInt(cursor)) });
     }
     return qb.getMany();
+  }
+
+  @Query(() => Post, { nullable: true })
+  post(@Arg("id") id: number): Promise<Post | undefined> {
+    return Post.findOne(id);
   }
 
   @Mutation(() => Post)
