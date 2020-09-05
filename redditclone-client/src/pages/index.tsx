@@ -14,7 +14,7 @@ const Index = () => {
   return (
     <Layout>
       <Flex alignItems="center">
-        <Heading color="teal">S redit</Heading>
+        <Heading color="teal">S:Redit</Heading>
         <NextLink href="/create-post">
           <Link ml="auto">create post</Link>
         </NextLink>
