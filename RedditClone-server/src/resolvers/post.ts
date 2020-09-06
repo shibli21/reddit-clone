@@ -1,3 +1,4 @@
+import { Updoot } from "./../entities/Updoot";
 import "reflect-metadata";
 import { MyContext } from "src/types";
 import {
@@ -52,7 +53,7 @@ export class PostResolver {
       .getRepository(Post)
       .createQueryBuilder("p")
       .innerJoinAndSelect("p.creator", "user", "user.id = p.creatorId")
-      .orderBy("p_createdAt", "DESC")
+
       .take(realLimitPlusOne);
     if (cursor) {
       qb.where(`p.createdAt < :cursor`, { cursor: new Date(parseInt(cursor)) });
@@ -68,6 +69,35 @@ export class PostResolver {
   @Query(() => Post, { nullable: true })
   post(@Arg("id") id: number): Promise<Post | undefined> {
     return Post.findOne(id);
+  }
+
+  @Mutation(() => Boolean)
+  @UseMiddleware(isAuth)
+  async vote(
+    @Arg("postId") postId: number,
+    @Arg("value") value: number,
+    @Ctx() { req }: MyContext
+  ) {
+    const isUpdoot = value !== -1;
+    const realValue = isUpdoot ? 1 : -1;
+    const { userId } = req.session!;
+    await Updoot.insert({
+      userId,
+      postId,
+      value: 2,
+    });
+
+    await getConnection()
+      .createQueryBuilder()
+      .update(Post)
+      .set({
+        points: realValue,
+      })
+      .where("id =:id", { id: postId })
+      .execute();
+
+    //
+    return true;
   }
 
   @Mutation(() => Post)

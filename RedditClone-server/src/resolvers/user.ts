@@ -1,15 +1,14 @@
-import { MyContext } from "./../types";
 import argon2 from "argon2";
 import "reflect-metadata";
 import {
   Arg,
   Ctx,
   Field,
+  FieldResolver,
   Mutation,
   ObjectType,
   Query,
   Resolver,
-  FieldResolver,
   Root,
 } from "type-graphql";
 import { getConnection } from "typeorm";
@@ -18,6 +17,7 @@ import { sendEmail } from "../utils/sendEmails";
 import { UsernamePasswordInput } from "../utils/UsernamePasswordInput";
 import { COOKIE_NAME, FORGOT_PASSWORD_PREFIX } from "./../constants";
 import { User } from "./../entities/User";
+import { MyContext } from "./../types";
 import { validateRegister } from "./../utils/validateRegister";
 
 @ObjectType()

@@ -1,3 +1,4 @@
+import { Updoot } from "./entities/Updoot";
 import { ApolloServer } from "apollo-server-express";
 import connectRedis from "connect-redis";
 import cors from "cors";
@@ -49,7 +50,7 @@ const main = async () => {
     database: "sredit",
     synchronize: true,
     logging: true,
-    entities: [User, Post],
+    entities: [User, Post, Updoot],
   });
 
   const app = express();
