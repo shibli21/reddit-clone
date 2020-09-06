@@ -53,7 +53,6 @@ export class PostResolver {
       .getRepository(Post)
       .createQueryBuilder("p")
       .innerJoinAndSelect("p.creator", "user", "user.id = p.creatorId")
-
       .take(realLimitPlusOne);
     if (cursor) {
       qb.where(`p.createdAt < :cursor`, { cursor: new Date(parseInt(cursor)) });
