@@ -51,7 +51,8 @@ export class PostResolver {
     const qb = getConnection()
       .getRepository(Post)
       .createQueryBuilder("p")
-      .orderBy("createdAt", "DESC")
+      .innerJoinAndSelect("p.creator", "user", "user.id = p.creatorId")
+      .orderBy("p_createdAt", "DESC")
       .take(realLimitPlusOne);
     if (cursor) {
       qb.where(`p.createdAt < :cursor`, { cursor: new Date(parseInt(cursor)) });
