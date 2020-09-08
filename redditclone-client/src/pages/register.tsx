@@ -46,12 +46,7 @@ const Register = (props: RegisterProps) => {
                 type="password"
               />
             </Box>
-            <Button
-              mt={4}
-              type="submit"
-              isLoading={isSubmitting}
-              variantColor="teal"
-            >
+            <Button mt={4} type="submit" isLoading={isSubmitting}>
               Register
             </Button>
           </Form>
