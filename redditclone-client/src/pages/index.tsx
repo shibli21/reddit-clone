@@ -35,28 +35,30 @@ const Index = () => {
         <h1>Loading ..</h1>
       ) : (
         <Stack spacing={8}>
-          {data!.posts.posts.map((post) => (
-            <Box key={post.id} p={5} shadow="md" borderWidth="1px">
-              <UpdootSection post={post} />
-              <IconButton
-                aria-label="delete"
-                icon="delete"
-                variantColor="red"
-                onClick={() => deletePost({ id: post.id })}
-              />
-              <Flex align="center">
-                <NextLink href="/post/[id]" as={`/post/${post.id}`}>
-                  <Link>
-                    <Heading fontSize="xl">{post.title}</Heading>
-                  </Link>
-                </NextLink>
-                <Heading ml="auto" fontSize="s" fontWeight="medium">
-                  {post.creator.username}
-                </Heading>
-              </Flex>
-              <Text mt={4}>{post.textSnippet}</Text>
-            </Box>
-          ))}
+          {data!.posts.posts.map((post) =>
+            !post ? null : (
+              <Box key={post.id} p={5} shadow="md" borderWidth="1px">
+                <UpdootSection post={post} />
+                <IconButton
+                  aria-label="delete"
+                  icon="delete"
+                  variantColor="red"
+                  onClick={() => deletePost({ id: post.id })}
+                />
+                <Flex align="center">
+                  <NextLink href="/post/[id]" as={`/post/${post.id}`}>
+                    <Link>
+                      <Heading fontSize="xl">{post.title}</Heading>
+                    </Link>
+                  </NextLink>
+                  <Heading ml="auto" fontSize="s" fontWeight="medium">
+                    {post.creator.username}
+                  </Heading>
+                </Flex>
+                <Text mt={4}>{post.textSnippet}</Text>
+              </Box>
+            )
+          )}
         </Stack>
       )}
       {data && data.posts.hasMore ? (
