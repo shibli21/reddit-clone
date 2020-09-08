@@ -12,7 +12,7 @@ import {
 import { withUrqlClient } from "next-urql";
 import NextLink from "next/link";
 import Layout from "../components/Layout";
-import { usePostsQuery } from "../generated/graphql";
+import { usePostsQuery, useDeletePostMutation } from "../generated/graphql";
 import { createUrqlClient } from "../utils/createUrqlClient";
 import { useState } from "react";
 import UpdootSection from "../components/UpdootSection";
@@ -22,6 +22,7 @@ const Index = () => {
     limit: 15,
     cursor: null as null | string,
   });
+  const [, deletePost] = useDeletePostMutation();
   const [{ data, fetching }] = usePostsQuery({
     variables,
   });
@@ -37,6 +38,12 @@ const Index = () => {
           {data!.posts.posts.map((post) => (
             <Box key={post.id} p={5} shadow="md" borderWidth="1px">
               <UpdootSection post={post} />
+              <IconButton
+                aria-label="delete"
+                icon="delete"
+                variantColor="red"
+                onClick={() => deletePost({ id: post.id })}
+              />
               <Flex align="center">
                 <NextLink href="/post/[id]" as={`/post/${post.id}`}>
                   <Link>
