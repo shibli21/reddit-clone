@@ -1,8 +1,9 @@
-import { Box, Button, Flex, Link } from "@chakra-ui/core";
+import { Box, Button, Flex, Link, Heading } from "@chakra-ui/core";
 import Nextlink from "next/link";
 import React from "react";
 import { useLogoutMutation, useMeQuery } from "../generated/graphql";
 import { isServer } from "../utils/isServer";
+import NextLink from "next/link";
 
 interface Props {}
 
@@ -33,7 +34,12 @@ export const NavBar = (props: Props) => {
     //user logged in
     body = (
       <>
-        <Flex>
+        <Flex align="center">
+          <NextLink href="/create-post">
+            <Button as={Link} mr={2}>
+              create post
+            </Button>
+          </NextLink>
           <Box mr={2} color="white">
             {data.me.username}
           </Box>
@@ -51,10 +57,17 @@ export const NavBar = (props: Props) => {
     );
   }
   return (
-    <Flex position="sticky" top={0} zIndex={1} bg="black" p={4}>
-      <Box ml={"auto"} maxW="1100px">
-        {body}
-      </Box>
+    <Flex position="sticky" top={0} zIndex={1} bg="black" p={4} align="center">
+      <Flex maxW={800} m="auto" align="center" flex={1}>
+        <Nextlink href="/">
+          <Link color="white">
+            <Heading>Sredit</Heading>
+          </Link>
+        </Nextlink>
+        <Box ml={"auto"} maxW="1100px">
+          {body}
+        </Box>
+      </Flex>
     </Flex>
   );
 };
