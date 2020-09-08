@@ -136,77 +136,112 @@ export class PostResolver {
     const { userId } = req.session!;
 
     const updoot = await Updoot.findOne({ where: { postId, userId } });
-    //user has voted on the post before
-    //and they are changing their vote
+
+    // the user has voted on the post before
+    // and they are changing their vote
     if (updoot && updoot.value !== realValue) {
       await getConnection().transaction(async (tm) => {
-        const points = await tm
-          .getRepository(Post)
-          .createQueryBuilder()
-          .where("id =:id", { id: postId })
-          .getOne();
+        await tm.query(
+          `
+    update updoot
+    set value = $1
+    where "postId" = $2 and "userId" = $3
+        `,
+          [realValue, postId, userId]
+        );
 
-        await tm
-          .createQueryBuilder()
-          .update(Updoot)
-          .set({
-            value: realValue,
-          })
-          .where("postId =:id1", { id1: postId })
-          .andWhere("userId =:id", { id: userId })
-          .execute();
-
-        await tm
-          .createQueryBuilder()
-          .update(Post)
-          .set({
-            points: 2 * realValue + points?.points!,
-          })
-          .where("id =:id", { id: postId })
-          .execute();
+        await tm.query(
+          `
+          update post
+          set points = points + $1
+          where id = $2
+        `,
+          [2 * realValue, postId]
+        );
       });
     } else if (!updoot) {
-      //has never voted before
+      // has never voted before
       await getConnection().transaction(async (tm) => {
-        await tm
-          .createQueryBuilder()
-          .insert()
-          .into(Updoot)
-          .values({
-            userId,
-            postId,
-            value: realValue,
-          })
-          .execute();
+        await tm.query(
+          `
+    insert into updoot ("userId", "postId", value)
+    values ($1, $2, $3)
+        `,
+          [userId, postId, realValue]
+        );
 
-        await tm
-          .createQueryBuilder()
-          .update(Post)
-          .set({
-            points: realValue,
-          })
-          .where("id =:id", { id: postId })
-          .execute();
+        await tm.query(
+          `
+    update post
+    set points = points + $1
+    where id = $2
+      `,
+          [realValue, postId]
+        );
       });
     }
-
-    // await Updoot.insert({
-    //   userId,
-    //   postId,
-    //   value: realValue,
-    // });
-
-    // await getConnection()
-    //   .createQueryBuilder()
-    //   .update(Post)
-    //   .set({
-    //     points: realValue,
-    //   })
-    //   .where("id =:id", { id: postId })
-    //   .execute();
-
-    //
     return true;
+
+    // const isUpdoot = value !== -1;
+    // const realValue = isUpdoot ? 1 : -1;
+    // const { userId } = req.session!;
+
+    // const updoot = await Updoot.findOne({ where: { postId, userId } });
+    // //user has voted on the post before
+    // //and they are changing their vote
+    // if (updoot && updoot.value !== realValue) {
+    //   await getConnection().transaction(async (tm) => {
+    //     const points = await tm
+    //       .getRepository(Post)
+    //       .createQueryBuilder()
+    //       .where("id =:id", { id: postId })
+    //       .getOne();
+
+    //     await tm
+    //       .createQueryBuilder()
+    //       .update(Updoot)
+    //       .set({
+    //         value: realValue,
+    //       })
+    //       .where("postId =:id1", { id1: postId })
+    //       .andWhere("userId =:id", { id: userId })
+    //       .execute();
+
+    //     await tm
+    //       .createQueryBuilder()
+    //       .update(Post)
+    //       .set({
+    //         points: 2 * realValue + points?.points!,
+    //       })
+    //       .where("id =:id", { id: postId })
+    //       .execute();
+    //   });
+    // } else if (!updoot) {
+    //   //has never voted before
+    //   await getConnection().transaction(async (tm) => {
+    //     await tm
+    //       .createQueryBuilder()
+    //       .insert()
+    //       .into(Updoot)
+    //       .values({
+    //         userId,
+    //         postId,
+    //         value: realValue,
+    //       })
+    //       .execute();
+
+    //     await tm
+    //       .createQueryBuilder()
+    //       .update(Post)
+    //       .set({
+    //         points: realValue,
+    //       })
+    //       .where("id =:id", { id: postId })
+    //       .execute();
+    //   });
+    // }
+
+    // return true;
   }
 
   @Mutation(() => Post)

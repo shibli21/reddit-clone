@@ -15,6 +15,7 @@ import { User } from "./entities/User";
 import { HelloResolver } from "./resolvers/hello";
 import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
+import path from "path";
 
 const main = async () => {
   // const connection = await createConnection({
@@ -33,11 +34,14 @@ const main = async () => {
     port: 5433,
     password: "root",
     username: "postgres",
-    database: "sredit2",
+    database: "sredit3",
     synchronize: true,
     logging: true,
+    migrations: [path.join(__dirname, "./migrations/*")],
     entities: [User, Post, Updoot],
   });
+
+  // await connection.runMigrations();
 
   const app = express();
 
