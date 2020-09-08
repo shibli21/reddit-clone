@@ -17,37 +17,23 @@ import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
 
 const main = async () => {
-  // const conn = await createConnection({
-  //   type: "postgres",
-  //   database: "sredit",
-  //   host: "localhost",
-  //   port: 5432,
-  //   username: "shibli21",
-  //   password: "root",
-  //   logging: true,
-  //   synchronize: true,
-  //   entities: [User, Post],
-  // });
-
-  // * FOR MySQL
-  // const connectionManager = getConnectionManager();
-  // const connection = connectionManager.create({
+  // const connection = await createConnection({
   //   type: "mysql",
   //   host: "localhost",
   //   port: 3306,
   //   username: "root",
   //   database: "sredit",
   //   synchronize: true,
-  //   entities: [User, Post],
+  //   logging: true,
+  //   entities: [User, Post, Updoot],
   // });
-  // await connection.connect();
-
   const connection = await createConnection({
-    type: "mysql",
+    type: "postgres",
     host: "localhost",
-    port: 3306,
-    username: "root",
-    database: "sredit",
+    port: 5433,
+    password: "root",
+    username: "postgres",
+    database: "sredit2",
     synchronize: true,
     logging: true,
     entities: [User, Post, Updoot],

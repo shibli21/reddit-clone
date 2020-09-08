@@ -45,20 +45,67 @@ export class PostResolver {
   @Query(() => PaginatedPosts)
   async posts(
     @Arg("limit", () => Int) limit: number,
-    @Arg("cursor", () => String, { nullable: true }) cursor: string | null
+    @Arg("cursor", () => String, { nullable: true }) cursor: string | null,
+    @Ctx() { req }: MyContext
   ): Promise<PaginatedPosts> {
+    const userId = req.session!.userId;
     const realLimit = Math.min(50, limit);
     const realLimitPlusOne = realLimit + 1;
-    const qb = getConnection()
-      .getRepository(Post)
-      .createQueryBuilder("p")
-      .innerJoinAndSelect("p.creator", "user", "user.id = p.creatorId")
-      .orderBy("p_createdAt", "DESC")
-      .take(realLimitPlusOne);
+    const replacements: any[] = [realLimitPlusOne, req.session!.userId];
+
     if (cursor) {
-      qb.where(`p.createdAt < :cursor`, { cursor: new Date(parseInt(cursor)) });
+      replacements.push(new Date(parseInt(cursor)));
     }
-    const posts = await qb.getMany();
+
+    const posts = await getConnection().query(
+      `
+        SELECT p.*,
+          json_build_object(
+            'id' ,u.id,
+            'username' ,u.username,
+            'email',u.email,
+            'createdAt' ,u."createdAt",
+            'updatedAt' ,u."updatedAt"
+          ) creator ,
+          ${
+            req.session!.userId
+              ? ' (select value from updoot where "userId" = $2 AND "postId" = p.id) "voteStatus"'
+              : 'null as "voteStatus"'
+          }
+            
+        from post p 
+        inner join public.user u on u.id = p."creatorId"
+        ${cursor ? `where p."createdAt" < $3` : ""}  
+        order by p."createdAt" DESC
+        limit $1
+      `,
+      replacements
+    );
+
+    // const qb = getConnection()
+    //   .getRepository(Post)
+    //   .createQueryBuilder("p")
+
+    //   .innerJoinAndSelect("p.creator", "user", "user.id = p.creatorId")
+    //   .orderBy(`"p_createdAt"`, "DESC")
+    //   .addSelect(
+    //     `( SELECT value FROM updoot u WHERE "userId" = ${userId} AND "postId" = p.id) voteStatus`
+    //   )
+    //   // .from(Updoot, "u")
+    //   // .where("u.postId = p.id")
+    //   // .andWhere("u.userId =:id", { id: userId })
+
+    //   // .where(
+    //   //   `, (SELECT value FROM updoot WHERE userId = ${userId} AND postId = p.id) 'voteStatus'`
+    //   // )
+    //   .take(realLimitPlusOne);
+    // if (cursor) {
+    //   qb.where(`"p.createdAt" < :cursor`, {
+    //     cursor: new Date(parseInt(cursor)),
+    //   });
+    // }
+
+    // const posts = await qb.getMany();
 
     return {
       posts: posts.slice(0, realLimit),
