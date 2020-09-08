@@ -26,6 +26,7 @@ const UpdootSection: React.FC<UpdootSection> = ({ post }) => {
           });
           setLoadingState("not-loading");
         }}
+        variantColor={post.voteStatus === 1 ? "green" : undefined}
         isLoading={loadingState === "up-loading"}
         icon="chevron-up"
         aria-label="updoot"
@@ -40,6 +41,7 @@ const UpdootSection: React.FC<UpdootSection> = ({ post }) => {
           setLoadingState("not-loading");
         }}
         isLoading={loadingState === "down-loading"}
+        variantColor={post.voteStatus === -1 ? "red" : undefined}
         icon="chevron-down"
         aria-label="downdoot"
       />
