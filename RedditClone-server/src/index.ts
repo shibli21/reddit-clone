@@ -16,6 +16,7 @@ import { HelloResolver } from "./resolvers/hello";
 import { PostResolver } from "./resolvers/post";
 import { UserResolver } from "./resolvers/user";
 import path from "path";
+import { createUserLoader } from "./utils/createUserLoader";
 
 const main = async () => {
   // const connection = await createConnection({
@@ -40,8 +41,6 @@ const main = async () => {
     migrations: [path.join(__dirname, "./migrations/*")],
     entities: [User, Post, Updoot],
   });
-
-  // await connection.runMigrations();
 
   const app = express();
 
@@ -72,7 +71,12 @@ const main = async () => {
       resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false,
     }),
-    context: ({ req, res }): MyContext => ({ req, res, redis }),
+    context: ({ req, res }): MyContext => ({
+      req,
+      res,
+      redis,
+      userLoader: createUserLoader(),
+    }),
   });
 
   apolloServer.applyMiddleware({ app, cors: false });

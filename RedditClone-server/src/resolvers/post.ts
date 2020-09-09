@@ -18,6 +18,7 @@ import {
 import { getConnection } from "typeorm";
 import { isAuth } from "../middleware/isAuth";
 import { Post } from "./../entities/Post";
+import { User } from "./../entities/User";
 
 @InputType()
 class PostInput {
@@ -40,6 +41,11 @@ export class PostResolver {
   @FieldResolver(() => String)
   textSnippet(@Root() root: Post) {
     return root.text.slice(0, 50);
+  }
+
+  @FieldResolver(() => User)
+  creator(@Root() post: Post, @Ctx() { userLoader }: MyContext) {
+    return userLoader.load(post.creatorId);
   }
 
   @Query(() => PaginatedPosts)
@@ -66,13 +72,6 @@ export class PostResolver {
     const posts = await getConnection().query(
       `
         SELECT p.*,
-          json_build_object(
-            'id' ,u.id,
-            'username' ,u.username,
-            'email',u.email,
-            'createdAt' ,u."createdAt",
-            'updatedAt' ,u."updatedAt"
-          ) creator ,
           ${
             req.session!.userId
               ? ' (select value from updoot where "userId" = $2 AND "postId" = p.id) "voteStatus"'
@@ -80,39 +79,12 @@ export class PostResolver {
           }
             
         from post p 
-        inner join public.user u on u.id = p."creatorId"
         ${cursor ? `where p."createdAt" < $${cursorIndex}` : ""}  
         order by p."createdAt" DESC
         limit $1
       `,
       replacements
     );
-
-    // const qb = getConnection()
-    //   .getRepository(Post)
-    //   .createQueryBuilder("p")
-
-    //   .innerJoinAndSelect("p.creator", "user", "user.id = p.creatorId")
-    //   .orderBy(`"p_createdAt"`, "DESC")
-    //   .addSelect(
-    //     `( SELECT value FROM updoot u WHERE "userId" = ${userId} AND "postId" = p.id) voteStatus`
-    //   )
-    //   // .from(Updoot, "u")
-    //   // .where("u.postId = p.id")
-    //   // .andWhere("u.userId =:id", { id: userId })
-
-    //   // .where(
-    //   //   `, (SELECT value FROM updoot WHERE userId = ${userId} AND postId = p.id) 'voteStatus'`
-    //   // )
-    //   .take(realLimitPlusOne);
-    // if (cursor) {
-    //   qb.where(`"p.createdAt" < :cursor`, {
-    //     cursor: new Date(parseInt(cursor)),
-    //   });
-    // }
-
-    // const posts = await qb.getMany();
-
     return {
       posts: posts.slice(0, realLimit),
       hasMore: posts.length === realLimitPlusOne,
@@ -181,67 +153,6 @@ export class PostResolver {
       });
     }
     return true;
-
-    // const isUpdoot = value !== -1;
-    // const realValue = isUpdoot ? 1 : -1;
-    // const { userId } = req.session!;
-
-    // const updoot = await Updoot.findOne({ where: { postId, userId } });
-    // //user has voted on the post before
-    // //and they are changing their vote
-    // if (updoot && updoot.value !== realValue) {
-    //   await getConnection().transaction(async (tm) => {
-    //     const points = await tm
-    //       .getRepository(Post)
-    //       .createQueryBuilder()
-    //       .where("id =:id", { id: postId })
-    //       .getOne();
-
-    //     await tm
-    //       .createQueryBuilder()
-    //       .update(Updoot)
-    //       .set({
-    //         value: realValue,
-    //       })
-    //       .where("postId =:id1", { id1: postId })
-    //       .andWhere("userId =:id", { id: userId })
-    //       .execute();
-
-    //     await tm
-    //       .createQueryBuilder()
-    //       .update(Post)
-    //       .set({
-    //         points: 2 * realValue + points?.points!,
-    //       })
-    //       .where("id =:id", { id: postId })
-    //       .execute();
-    //   });
-    // } else if (!updoot) {
-    //   //has never voted before
-    //   await getConnection().transaction(async (tm) => {
-    //     await tm
-    //       .createQueryBuilder()
-    //       .insert()
-    //       .into(Updoot)
-    //       .values({
-    //         userId,
-    //         postId,
-    //         value: realValue,
-    //       })
-    //       .execute();
-
-    //     await tm
-    //       .createQueryBuilder()
-    //       .update(Post)
-    //       .set({
-    //         points: realValue,
-    //       })
-    //       .where("id =:id", { id: postId })
-    //       .execute();
-    //   });
-    // }
-
-    // return true;
   }
 
   @Mutation(() => Post)
