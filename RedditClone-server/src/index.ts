@@ -1,3 +1,4 @@
+import { createUpdootLoader } from "./utils/createUpdootLoader";
 import { Updoot } from "./entities/Updoot";
 import { ApolloServer } from "apollo-server-express";
 import connectRedis from "connect-redis";
@@ -76,6 +77,7 @@ const main = async () => {
       res,
       redis,
       userLoader: createUserLoader(),
+      updootLoader: createUpdootLoader(),
     }),
   });
 
