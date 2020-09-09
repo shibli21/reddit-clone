@@ -1,27 +1,33 @@
 import {
   Box,
+  Button,
   Flex,
   Heading,
+  IconButton,
   Link,
   Stack,
   Text,
-  Button,
-  Icon,
-  IconButton,
 } from "@chakra-ui/core";
 import { withUrqlClient } from "next-urql";
 import NextLink from "next/link";
-import Layout from "../components/Layout";
-import { usePostsQuery, useDeletePostMutation } from "../generated/graphql";
-import { createUrqlClient } from "../utils/createUrqlClient";
 import { useState } from "react";
+import Layout from "../components/Layout";
 import UpdootSection from "../components/UpdootSection";
+import {
+  useDeletePostMutation,
+  useMeQuery,
+  usePostsQuery,
+} from "../generated/graphql";
+import { createUrqlClient } from "../utils/createUrqlClient";
 
 const Index = () => {
   const [variables, setVariables] = useState({
     limit: 15,
     cursor: null as null | string,
   });
+
+  const [{ data: meData }] = useMeQuery();
+
   const [, deletePost] = useDeletePostMutation();
   const [{ data, fetching }] = usePostsQuery({
     variables,
@@ -39,12 +45,28 @@ const Index = () => {
             !post ? null : (
               <Box key={post.id} p={5} shadow="md" borderWidth="1px">
                 <UpdootSection post={post} />
-                <IconButton
-                  aria-label="delete"
-                  icon="delete"
-                  variantColor="red"
-                  onClick={() => deletePost({ id: post.id })}
-                />
+                {meData?.me?.id === post.creatorId ? (
+                  <Box>
+                    <IconButton
+                      aria-label="delete"
+                      icon="delete"
+                      variantColor="red"
+                      onClick={() => deletePost({ id: post.id })}
+                    />
+                    <NextLink
+                      href="/post/edit/[id]"
+                      as={`/post/edit/${post.id}`}
+                    >
+                      <IconButton
+                        as={Link}
+                        ml={4}
+                        aria-label="edit"
+                        icon="edit"
+                        variantColor="blue"
+                      />
+                    </NextLink>
+                  </Box>
+                ) : null}
                 <Flex align="center">
                   <NextLink href="/post/[id]" as={`/post/${post.id}`}>
                     <Link>
