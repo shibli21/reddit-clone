@@ -6,6 +6,7 @@ import { usePostQuery } from "../../generated/graphql";
 import Layout from "../../components/Layout";
 import { Spinner, Heading, Text, Box } from "@chakra-ui/core";
 import UpdootSection from "../../components/UpdootSection";
+import EditDeletePostButtons from "../../components/EditDeletePostButtons";
 
 const Post = () => {
   const router = useRouter();
@@ -42,6 +43,10 @@ const Post = () => {
 
   return (
     <Layout>
+      <EditDeletePostButtons
+        id={data.post.id}
+        creatorId={data.post.creator.id}
+      />
       <Heading mb={4}>{data.post.title}</Heading>
       {/* <UpdootSection post={data.post} /> */}
       <Text> {data.post.text}</Text>

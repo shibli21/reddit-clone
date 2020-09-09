@@ -1,23 +1,11 @@
-import {
-  Box,
-  Button,
-  Flex,
-  Heading,
-  IconButton,
-  Link,
-  Stack,
-  Text,
-} from "@chakra-ui/core";
+import { Box, Button, Flex, Heading, Link, Stack, Text } from "@chakra-ui/core";
 import { withUrqlClient } from "next-urql";
 import NextLink from "next/link";
 import { useState } from "react";
+import EditDeletePostButtons from "../components/EditDeletePostButtons";
 import Layout from "../components/Layout";
 import UpdootSection from "../components/UpdootSection";
-import {
-  useDeletePostMutation,
-  useMeQuery,
-  usePostsQuery,
-} from "../generated/graphql";
+import { usePostsQuery } from "../generated/graphql";
 import { createUrqlClient } from "../utils/createUrqlClient";
 
 const Index = () => {
@@ -26,9 +14,6 @@ const Index = () => {
     cursor: null as null | string,
   });
 
-  const [{ data: meData }] = useMeQuery();
-
-  const [, deletePost] = useDeletePostMutation();
   const [{ data, fetching }] = usePostsQuery({
     variables,
   });
@@ -45,28 +30,10 @@ const Index = () => {
             !post ? null : (
               <Box key={post.id} p={5} shadow="md" borderWidth="1px">
                 <UpdootSection post={post} />
-                {meData?.me?.id === post.creatorId ? (
-                  <Box>
-                    <IconButton
-                      aria-label="delete"
-                      icon="delete"
-                      variantColor="red"
-                      onClick={() => deletePost({ id: post.id })}
-                    />
-                    <NextLink
-                      href="/post/edit/[id]"
-                      as={`/post/edit/${post.id}`}
-                    >
-                      <IconButton
-                        as={Link}
-                        ml={4}
-                        aria-label="edit"
-                        icon="edit"
-                        variantColor="blue"
-                      />
-                    </NextLink>
-                  </Box>
-                ) : null}
+                <EditDeletePostButtons
+                  id={post.id}
+                  creatorId={post.creator.id}
+                />
                 <Flex align="center">
                   <NextLink href="/post/[id]" as={`/post/${post.id}`}>
                     <Link>
