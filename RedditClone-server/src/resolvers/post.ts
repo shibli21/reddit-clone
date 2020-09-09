@@ -268,7 +268,7 @@ export class PostResolver {
       .createQueryBuilder()
       .update(Post)
       .set({ title, text })
-      .where('id  = :id and "creatorId" =: creatorId', {
+      .where('id  = :id and "creatorId" = :creatorId', {
         id,
         creatorId: req.session!.userId,
       })
